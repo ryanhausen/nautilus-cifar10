@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tf-latest
+spec:
+  containers:
+  - name: tf-latest
+    image: tensorflow/tensorflow:latest-devel-gpu-py3
+    imagePullPolicy: IfNotPresent
+    command: ['/bin/sh']
+    args: ['-c', 'nvidia-smi']
+    resources:
+      limits:
+        nvidia.com/gpu: 1
