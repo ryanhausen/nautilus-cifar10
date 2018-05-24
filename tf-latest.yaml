@@ -9,6 +9,16 @@ spec:
     imagePullPolicy: IfNotPresent
     command: ['/bin/sh']
     args: ['-c', 'pwd']
+    env:
+        - name: COMET_API_KEY
+        valueFrom:
+            secretKeyRef:
+                name: logger
+                key: logapi
     resources:
       limits:
         nvidia.com/gpu: 1
+    volumes:
+    - name: git-volume
+        gitRepo:
+            repository: ''
