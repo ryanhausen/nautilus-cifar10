@@ -7,8 +7,8 @@ spec:
   - name: tf-latest
     image: tensorflow/tensorflow:latest-devel-gpu-py3
     imagePullPolicy: IfNotPresent
-    command: ['/bin/sh']
-    args: ['-c', 'pwd']
+    command: ['python']
+    args: ['/workspace/reduced_dataset_training.py']
     env:
         - name: COMET_API_KEY
         valueFrom:
@@ -18,7 +18,22 @@ spec:
     resources:
       limits:
         nvidia.com/gpu: 1
-    volumes:
-    - name: git-volume
-        gitRepo:
-            repository: ''
+    volumeMounts:
+    - name: workspace
+        mountPath: /workspace
+
+  initContainer:
+  - name: gitSetup
+    image: ubuntu
+    command:
+      - git
+      - 'clone'
+      - 'git@github.com:ryanhausen/nautilus-cifar10.git'
+      - '/workspace'
+    volumeMounts:
+    - name: workspace
+        mountPath: /workspace
+  volumes:
+  - name: workspace
+    emptyDir: {}
+

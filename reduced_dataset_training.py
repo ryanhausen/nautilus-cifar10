@@ -21,8 +21,7 @@ from keras.utils import np_utils
 
 
 def load_comet():
-    with open('comet-ml-key') as f:
-        comet_key = f.read().strip()
+    comet_key = os.environ['COMET_API_KEY']
     return Experiment(api_key=comet_key,
                       project_name='reduced-dataset-cifar10')
 
@@ -117,7 +116,7 @@ def train(x_train, y_train, x_test, y_test, start_epoch, end_epoch, batch_size):
                                steps_per_epoch=50e3 // batch_size,
                                initial_epoch=start_epoch,
                                epochs=end_epoch,
-                               verbose=1,
+                               verbose=2,
                                validation_data=(x_test,y_test),
                                callbacks=[LearningRateScheduler(lr_schedule)])
     hist = mfit.history
@@ -160,7 +159,7 @@ def get_data():
 def main():
     # params
     batch_size = 32
-    data_schedule = [(1/32, 5), (1/16, 5), (1/8, 5), (1/4, 5), (1/2, 5), (1, 100)]
+    data_schedule = [(1/32, 60), (1/16, 30), (1/8, 15), (1/4, 8), (1/2, 4), (1, 2)]
 
     log_params = {
         'batch_size': batch_size,
@@ -170,6 +169,7 @@ def main():
     # get comet setup
     experiment = load_comet()
 
+
     experiment.log_multiple_params(log_params)
 
     # start experiment
@@ -178,6 +178,7 @@ def main():
     history = None
     current_epoch = 0
     for ratio, epochs in data_schedule:
+        experiment.log_metric('training_ratio', ratio, step=current_epoch)
         hist = train(fraction(x_train, ratio),
                     fraction(y_train, ratio),
                     x_test,
@@ -185,7 +186,6 @@ def main():
                     current_epoch,
                     current_epoch+epochs,
                     batch_size)
-        experiment.log_metric('training_ratio', ratio, step=current_epoch)
 
         if history is None:
             history = hist
