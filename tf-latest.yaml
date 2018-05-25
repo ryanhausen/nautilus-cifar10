@@ -7,32 +7,29 @@ spec:
   - name: tf-latest
     image: tensorflow/tensorflow:latest-devel-gpu-py3
     imagePullPolicy: IfNotPresent
-    command: ['python']
-    args: ['/workspace/reduced_dataset_training.py']
+    command: ['/bin/sh', '-c']
+    args: ['pip install comet_ml; python /workspace/reduced_dataset_training.py']
     env:
-        - name: COMET_API_KEY
-        valueFrom:
-            secretKeyRef:
-                name: logger
-                key: logapi
+    - name: COMET_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: logger
+          key: logapi
     resources:
       limits:
         nvidia.com/gpu: 1
     volumeMounts:
     - name: workspace
-        mountPath: /workspace
+      mountPath: /workspace
 
-  initContainer:
-  - name: gitSetup
-    image: ubuntu
-    command:
-      - git
-      - 'clone'
-      - 'git@github.com:ryanhausen/nautilus-cifar10.git'
-      - '/workspace'
+  initContainers:
+  - name: git-setup
+    image: gitlab/gitlab-ce
+    command: ['/bin/sh', '-c']
+    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /workspace']
     volumeMounts:
     - name: workspace
-        mountPath: /workspace
+      mountPath: /workspace
   volumes:
   - name: workspace
     emptyDir: {}

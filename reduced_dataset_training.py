@@ -158,8 +158,9 @@ def get_data():
 
 def main():
     # params
-    batch_size = 32
-    data_schedule = [(1/32, 60), (1/16, 30), (1/8, 15), (1/4, 8), (1/2, 4), (1, 2)]
+    batch_size = 2048
+
+    data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
 
     log_params = {
         'batch_size': batch_size,
