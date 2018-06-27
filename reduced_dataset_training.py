@@ -168,10 +168,10 @@ def main():
     }
 
     # get comet setup
-    experiment = load_comet()
+    #experiment = load_comet()
 
 
-    experiment.log_multiple_params(log_params)
+    #experiment.log_multiple_params(log_params)
 
     # start experiment
     (x_train, y_train), (x_test, y_test) = get_data()
@@ -179,7 +179,7 @@ def main():
     history = None
     current_epoch = 0
     for ratio, epochs in data_schedule:
-        experiment.log_metric('training_ratio', ratio, step=current_epoch)
+        #experiment.log_metric('training_ratio', ratio, step=current_epoch)
         hist = train(fraction(x_train, ratio),
                     fraction(y_train, ratio),
                     x_test,
