@@ -8,7 +8,8 @@ spec:
     image: ryanhausen/ryanml:latest
     imagePullPolicy: IfNotPresent
     command: ['/bin/sh', '-c']
-    args: ['python /workspace/reduced_dataset_training.py']
+    args: ['python reduced_dataset_training.py']
+    #args: ['pwd']
     env:
     - name: COMET_API_KEY
       valueFrom:
@@ -19,18 +20,19 @@ spec:
       limits:
         nvidia.com/gpu: 1
     volumeMounts:
-    - name: workspace
-      mountPath: /workspace
+    - name: gitrepo
+      mountPath: /root/src
 
+
+# https://gist.github.com/tallclair/849601a16cebeee581ef2be50c351841
   initContainers:
   - name: git-setup
-    image: gitlab/gitlab-ce
+    image: alpine/git
     command: ['/bin/sh', '-c']
-    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /workspace']
+    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /repo']
     volumeMounts:
-    - name: workspace
-      mountPath: /workspace
+    - name: gitrepo
+      mountPath: /repo
   volumes:
-  - name: workspace
-    emptyDir: {}
-
+  - emptyDir: {}
+    name: gitrepo
