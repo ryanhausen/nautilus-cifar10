@@ -5,10 +5,10 @@ metadata:
 spec:
   containers:
   - name: tf-latest
-    image: tensorflow/tensorflow:latest-devel-gpu-py3
+    image: ryanhausen/ryanml:latest
     imagePullPolicy: IfNotPresent
     command: ['/bin/sh', '-c']
-    args: ['pip install comet_ml; python /workspace/reduced_dataset_training.py']
+    args: ['python /workspace/reduced_dataset_training.py']
     env:
     - name: COMET_API_KEY
       valueFrom:
