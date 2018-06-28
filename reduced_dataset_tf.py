@@ -139,10 +139,10 @@ def main():
     experiment = load_comet()
     experiment.log_multiple_params(log_params)
 
-    learning_rate = tf.placeholder(tf.float32)
-    x = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
-    y = tf.placeholder(tf.int32, shape=[None, 1])
-    is_training = tf.placeholder(tf.bool)
+    learning_rate = tf.placeholder(tf.float32, shape=[], name='lr_placeholder')
+    x = tf.placeholder(tf.float32, shape=[None, 32, 32, 3], name='x_placeholder')
+    y = tf.placeholder(tf.int32, shape=[None, 1], name='y_placeholder')
+    is_training = tf.placeholder(tf.bool, shape=[], name='is_training_placeholder')
 
     net = build_graph(x, is_training)
 
@@ -194,7 +194,7 @@ def main():
                                           ratio,
                                           step=current_epoch)
                     experiment.log_metric('learning_rate',
-                                          get_learning_rate(current_epoch),
+                                          current_lr,
                                           step=current_epoch)
                     for _ in range(num_train_batches):
                         batch_xs, batch_ys = next(train_data)
