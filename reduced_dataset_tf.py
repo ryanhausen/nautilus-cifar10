@@ -184,6 +184,7 @@ def main():
 
             for _ in range(num_epochs):
                 current_epoch += 1
+                current_lr = get_learning_rate(current_epoch)
                 print('Current Epoch:{}'.format(current_epoch))
 
                 sess.run(acc_reset)
@@ -200,7 +201,7 @@ def main():
                         feed_dict = {x:batch_xs,
                                      y:batch_ys,
                                      is_training:True,
-                                     learning_rate:get_learning_rate(current_epoch)}
+                                     learning_rate:current_lr}
                         sess.run([train, acc_update], feed_dict=feed_dict)
 
                     experiment.log_metric('accuracy',
