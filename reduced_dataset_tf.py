@@ -45,7 +45,7 @@ def build_graph(x, is_training):
                          padding='SAME',
                          kernel_regularizer=regularizer)
     x = tf.nn.elu(x)
-    x = tf.layerget_datas.batch_normalization(x, training=is_training)
+    x = tf.layer.batch_normalization(x, training=is_training)
     x = tf.layers.max_pooling2d(x, (2,2), (1,1))
     x = tf.layers.dropout(x, rate=0.3, training=is_training)
 
@@ -216,23 +216,6 @@ def main():
                     experiment.log_metric('accuracy',
                                           sess.run(acc),
                                           step=current_epoch)
-
-
-
-
-
-
-
-            # testing
-
-
-
-
-
-
-
-
-
 
 
 if __name__=='__main__':
