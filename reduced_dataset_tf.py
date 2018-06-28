@@ -153,7 +153,7 @@ def main():
     acc, acc_update, acc_reset = create_reset_metric(tf.metrics.accuracy,
                                                      'metric_acc',
                                                      labels=y,
-                                                     predictions=tf.argmax(net))
+                                                     predictions=tf.argmax(net, axis=-1))
 
     (x_train, y_train), (x_test, y_test) = get_data()
     train_gen = ImageDataGenerator(rotation_range=15,
