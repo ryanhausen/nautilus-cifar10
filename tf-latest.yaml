@@ -3,6 +3,7 @@ kind: Pod
 metadata:
   name: tf-latest
 spec:
+  restartPolicy: Never
   containers:
   - name: tf-latest
     image: ryanhausen/ryanml:latest

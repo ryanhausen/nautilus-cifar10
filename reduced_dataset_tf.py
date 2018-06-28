@@ -113,8 +113,8 @@ def fraction(a, ratio):
 def create_reset_metric(metric, scope='reset_metrics', **metric_args):
     with tf.variable_scope(scope) as scope:
         metric_op, update_op = metric(**metric_args)
-        vs = tf.get_collection(collection=tf.GraphKeys.LOCAL_VARIABLES,
-                               scope=scope)
+        vs = tf.contrib.framework.get_variables(
+                 scope, collection=tf.GraphKeys.LOCAL_VARIABLES)
         reset_op = tf.variables_initializer(vs)
     return metric_op, update_op, reset_op
 
@@ -141,7 +141,7 @@ def main():
 
     learning_rate = tf.placeholder(tf.float32)
     x = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
-    y = tf.placeholder(tf.float32, shape=[None, 1])
+    y = tf.placeholder(tf.int32, shape=[None, 1])
     is_training = tf.placeholder(tf.bool)
 
     net = build_graph(x, is_training)
@@ -163,8 +163,8 @@ def main():
 
     test_gen = ImageDataGenerator()
 
-    num_train_batches = 50e3 // batch_size
-    num_test_batches = 10e3 // batch_size
+    num_train_batches = int(50e3 // batch_size)
+    num_test_batches = int(10e3 // batch_size)
 
     init = tf.global_variables_initializer()
 
@@ -184,6 +184,7 @@ def main():
 
             for _ in range(num_epochs):
                 current_epoch += 1
+                print('Current Epoch:{}'.format(current_epoch))
 
                 sess.run(acc_reset)
                 # training
