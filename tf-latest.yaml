@@ -8,7 +8,7 @@ spec:
     image: ryanhausen/ryanml:latest
     imagePullPolicy: IfNotPresent
     command: ['/bin/sh', '-c']
-    args: ['python reduced_dataset_training.py']
+    args: ['python reduced_dataset_tf.py']
     #args: ['pwd']
     env:
     - name: COMET_API_KEY

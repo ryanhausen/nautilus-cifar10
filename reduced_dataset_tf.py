@@ -29,7 +29,7 @@ def build_graph(x, is_training):
                          kernel_regularizer=regularizer)
     x = tf.nn.elu(x)
     x = tf.layers.batch_normalization(x, training=is_training)
-    x = tf.layers.max_pooling2d(x, (2,2))
+    x = tf.layers.max_pooling2d(x, (2,2), (1,1))
     x = tf.layers.dropout(x, rate=0.2, training=is_training)
 
     x = tf.layers.conv2d(x,
@@ -46,7 +46,7 @@ def build_graph(x, is_training):
                          kernel_regularizer=regularizer)
     x = tf.nn.elu(x)
     x = tf.layerget_datas.batch_normalization(x, training=is_training)
-    x = tf.layers.max_pooling2d(x, (2,2))
+    x = tf.layers.max_pooling2d(x, (2,2), (1,1))
     x = tf.layers.dropout(x, rate=0.3, training=is_training)
 
     x = tf.layers.conv2d(x,
@@ -63,7 +63,7 @@ def build_graph(x, is_training):
                          kernel_regularizer=regularizer)
     x = tf.nn.elu(x)
     x = tf.layers.batch_normalization(x, training=is_training)
-    x = tf.layers.max_pooling2d(x, (2,2))
+    x = tf.layers.max_pooling2d(x, (2,2), (1,1))
     x = tf.layers.dropout(x, rate=0.4, training=is_training)
 
     x = tf.layers.flatten(x)
@@ -109,6 +109,15 @@ def fraction(a, ratio):
     r = int(ratio*a.shape[0])
     return a.copy()[:r]
 
+#https://github.com/tensorflow/tensorflow/issues/4814#issuecomment-314801758
+def create_reset_metric(metric, scope='reset_metrics', **metric_args):
+    with tf.variable_scope(scope) as scope:
+        metric_op, update_op = metric(**metric_args)
+        vs = tf.get_collection(collection=tf.GraphKeys.LOCAL_VARIABLES,
+                               scope=scope)
+        reset_op = tf.variables_initializer(vs)
+    return metric_op, update_op, reset_op
+
 def main():
     batch_size = 2048
     #data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
@@ -124,41 +133,84 @@ def main():
 
     learning_rate = tf.Variable(0.001)
     x = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
-    y = tf.placeholder(tf.float32, shape=[None, 10])
+    y = tf.placeholder(tf.float32, shape=[None, 1])
     is_training = tf.placeholder(tf.bool)
 
     net = build_graph(x, is_training)
 
 
     loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=net,
-                                                      labels=y)
-
-
-    opt = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
+                                                      labels=tf.one_hot(y, 10))
+    train = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
+    acc, acc_update, acc_reset = create_reset_metric(tf.metrics.accuracy,
+                                                     'metric_acc',
+                                                     labels=y,
+                                                     predictions=tf.argmax(net))
 
     (x_train, y_train), (x_test, y_test) = get_data()
-    gen = ImageDataGenerator(rotation_range=15,
-                             width_shift_range=0.1,
-                             height_shift_range=0.1,
-                             horizontal_flip=True)
+    train_gen = ImageDataGenerator(rotation_range=15,
+                                   width_shift_range=0.1,
+                                   height_shift_range=0.1,
+                                   horizontal_flip=True)
 
-    num_batches = 50e3 // batch_size
-    for ratio, num_epochs in data_schedule:
-        data = gen.flow(fraction(x_train, ratio), 
-                        fraction(y_train, ratio), 
-                        batch_size=batch_size,
-                        shuffle=True)
+    test_gen = ImageDataGenerator()
 
-        # training
-        for _ in range(num_batches):
-            batch_xs, batch_ys = next(data)
+    num_train_batches = 50e3 // batch_size
+    num_test_batches = 10e3 // batch_size
+
+    init = tf.global_variables_initializer()
 
 
+    with tf.Session() as sess:
+        sess.run(init)
+        experiment.set_model_graph(sess.graph)
+
+        current_epoch = 0
+        for ratio, num_epochs in data_schedule:
+            train_data = train_gen.flow(fraction(x_train, ratio),
+                                        fraction(y_train, ratio),
+                                        batch_size=batch_size,
+                                        shuffle=True)
+
+            test_data = test_gen.flow(x_test, y_test, batch_size=batch_size)
+
+            for _ in range(num_epochs):
+                current_epoch += 1
+                sess.run(acc_reset)
+                # training
+                with experiment.train():
+                    experiment.log_metric('data_ratio',
+                                           ratio,
+                                           step=current_epoch)
+                    for _ in range(num_train_batches):
+                        batch_xs, batch_ys = next(train_data)
+                        feed_dict = {x:batch_xs, y:batch_ys, is_training:True}
+                        sess.run([train, acc_update], feed_dict=feed_dict)
+
+                    experiment.log_metric('accuracy',
+                                          sess.run(acc),
+                                          step=current_epoch)
+
+                sess.run(acc_reset)
+                with experiment.test():
+                    for _ in range(num_test_batches):
+                        batch_xs, batch_ys = next(test_data)
+                        feed_dict = {x:batch_xs, y:batch_ys, is_training:False}
+                        sess.run([train, acc_update], feed_dict=feed_dict)
+
+                    experiment.log_metric('accuracy',
+                                          sess.run(acc),
+                                          step=current_epoch)
 
 
-        # testing
 
-        
+
+
+
+
+            # testing
+
+
 
 
 
