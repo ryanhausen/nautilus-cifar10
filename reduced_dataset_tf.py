@@ -127,7 +127,7 @@ def get_learning_rate(epoch):
     return lrate
 
 def main():
-    batch_size = 1024
+    batch_size = 512
     #data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
     data_schedule = [(1, 126)]
 
