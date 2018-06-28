@@ -213,7 +213,7 @@ def main():
                     for _ in range(num_test_batches):
                         batch_xs, batch_ys = next(test_data)
                         feed_dict = {x:batch_xs, y:batch_ys, is_training:False}
-                        sess.run([train, acc_update], feed_dict=feed_dict)
+                        sess.run([acc_update], feed_dict=feed_dict)
 
                     experiment.log_metric('accuracy',
                                           sess.run(acc),
