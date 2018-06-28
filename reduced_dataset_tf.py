@@ -83,10 +83,6 @@ def get_data():
     x_train = (x_train-mean)/(std+1e-7)
     x_test = (x_test-mean)/(std+1e-7)
 
-    num_classes = 10
-    y_train = np_utils.to_categorical(y_train,num_classes)
-    y_test = np_utils.to_categorical(y_test,num_classes)
-
     return (x_train, y_train), (x_test, y_test)
 
 def load_comet():
@@ -133,16 +129,36 @@ def main():
 
     net = build_graph(x, is_training)
 
-    loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=net,labels=y)
+
+    loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=net,
+                                                      labels=y)
+
+
     opt = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
 
-    x_train, y_train, x_test, y_test = get_data()
+    (x_train, y_train), (x_test, y_test) = get_data()
     gen = ImageDataGenerator(rotation_range=15,
-                              width_shift_range=0.1,
-                              height_shift_range=0.1,
-                              horizontal_flip=True)
+                             width_shift_range=0.1,
+                             height_shift_range=0.1,
+                             horizontal_flip=True)
 
-    data = gen.flow(x_train, y_train, batch_size=batch_size)
+    num_batches = 50e3 // batch_size
+    for ratio, num_epochs in data_schedule:
+        data = gen.flow(fraction(x_train, ratio), 
+                        fraction(y_train, ratio), 
+                        batch_size=batch_size,
+                        shuffle=True)
+
+        # training
+        for _ in range(num_batches):
+            batch_xs, batch_ys = next(data)
+
+
+
+
+        # testing
+
+        
 
 
 
