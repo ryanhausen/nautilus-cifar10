@@ -118,6 +118,14 @@ def create_reset_metric(metric, scope='reset_metrics', **metric_args):
         reset_op = tf.variables_initializer(vs)
     return metric_op, update_op, reset_op
 
+def get_learning_rate(epoch):
+    lrate = 0.001
+    if epoch > 75:
+        lrate = 0.0005
+    elif epoch > 100:
+        lrate = 0.0003
+    return lrate
+
 def main():
     batch_size = 2048
     #data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
@@ -131,7 +139,7 @@ def main():
     experiment = load_comet()
     experiment.log_multiple_params(log_params)
 
-    learning_rate = tf.Variable(0.001)
+    learning_rate = tf.placeholder(tf.float32)
     x = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
     y = tf.placeholder(tf.float32, shape=[None, 1])
     is_training = tf.placeholder(tf.bool)
@@ -176,15 +184,22 @@ def main():
 
             for _ in range(num_epochs):
                 current_epoch += 1
+
                 sess.run(acc_reset)
                 # training
                 with experiment.train():
                     experiment.log_metric('data_ratio',
-                                           ratio,
-                                           step=current_epoch)
+                                          ratio,
+                                          step=current_epoch)
+                    experiment.log_metric('learning_rate',
+                                          get_learning_rate(current_epoch),
+                                          step=current_epoch)
                     for _ in range(num_train_batches):
                         batch_xs, batch_ys = next(train_data)
-                        feed_dict = {x:batch_xs, y:batch_ys, is_training:True}
+                        feed_dict = {x:batch_xs,
+                                     y:batch_ys,
+                                     is_training:True,
+                                     learning_rate:get_learning_rate(current_epoch)}
                         sess.run([train, acc_update], feed_dict=feed_dict)
 
                     experiment.log_metric('accuracy',
