@@ -45,7 +45,7 @@ def build_graph(x, is_training):
                          padding='SAME',
                          kernel_regularizer=regularizer)
     x = tf.nn.elu(x)
-    x = tf.layer.batch_normalization(x, training=is_training)
+    x = tf.layers.batch_normalization(x, training=is_training)
     x = tf.layers.max_pooling2d(x, (2,2), (1,1))
     x = tf.layers.dropout(x, rate=0.3, training=is_training)
 
