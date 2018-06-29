@@ -149,7 +149,11 @@ def main():
 
     loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=net,
                                                       labels=tf.one_hot(y, 10))
-    train = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
+
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        train = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
+    
     acc, acc_update, acc_reset = create_reset_metric(tf.metrics.accuracy,
                                                      'metric_acc',
                                                      labels=y,
@@ -222,3 +226,4 @@ def main():
 
 if __name__=='__main__':
     main()
+
