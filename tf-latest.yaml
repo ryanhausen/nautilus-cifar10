@@ -31,10 +31,15 @@ spec:
   - name: git-setup
     image: alpine/git
     command: ['/bin/sh', '-c']
-    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /repo']
+    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /repo && mv /transit/* /repo/']
     volumeMounts:
     - name: gitrepo
       mountPath: /repo
+    - name: transit
+      mountPath: /transit
   volumes:
-  - emptyDir: {}
-    name: gitrepo
+  - name: gitrepo
+    emptyDir: {}
+  - name: transit
+    persistentVolumeClaim:
+      claimName: transit
