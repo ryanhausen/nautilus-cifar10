@@ -122,7 +122,7 @@ def get_learning_rate(epoch):
     lrate = 0.001
     if epoch > 75:
         lrate = 0.0005
-    elif epoch > 100:
+    if epoch > 100:
         lrate = 0.0003
     return lrate
 
