@@ -128,8 +128,8 @@ def get_learning_rate(epoch):
 
 def main():
     batch_size = 512
-    #data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
-    data_schedule = [(1, 126)]
+    data_schedule = [(1/32, 2), (1/16, 4), (1/8, 8), (1/4, 16), (1/2, 32), (1, 64)]
+    #data_schedule = [(1, 126)]
 
     log_params = {
         'batch_size': batch_size,
@@ -153,7 +153,7 @@ def main():
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
         train = tf.train.RMSPropOptimizer(learning_rate, decay=1e-6).minimize(loss)
-    
+
     acc, acc_update, acc_reset = create_reset_metric(tf.metrics.accuracy,
                                                      'metric_acc',
                                                      labels=y,
