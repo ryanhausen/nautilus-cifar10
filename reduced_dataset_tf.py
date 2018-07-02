@@ -121,15 +121,17 @@ def create_reset_metric(metric, scope='reset_metrics', **metric_args):
 def get_learning_rate(epoch):
     lrate = 0.001
     if epoch > 75:
-        lrate = 0.0005
+        lrate = 0.0001
     if epoch > 100:
-        lrate = 0.0003
+        lrate = 0.00001
+    if epoch > 125:
+        lrate = 0.000001
     return lrate
 
 def main():
     batch_size = 512
-    data_schedule = [(1/32, 8), (1/16, 16), (1/8, 16), (1/4, 32), (1/2, 32), (1, 64)]
-    #data_schedule = [(1, 126)]
+    #data_schedule = [(1/32, 8), (1/16, 16), (1/8, 16), (1/4, 32), (1/2, 32), (1, 64)]
+    data_schedule = [(1, 162)]
 
     log_params = {
         'batch_size': batch_size,
