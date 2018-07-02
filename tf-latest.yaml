@@ -10,7 +10,6 @@ spec:
     imagePullPolicy: IfNotPresent
     command: ['/bin/sh', '-c']
     args: ['python reduced_dataset_tf.py']
-    #args: ['pwd']
     env:
     - name: COMET_API_KEY
       valueFrom:
@@ -25,21 +24,16 @@ spec:
     - name: gitrepo
       mountPath: /root/src
 
-
 # https://gist.github.com/tallclair/849601a16cebeee581ef2be50c351841
   initContainers:
-  - name: git-setup
+  - name: git-helper
     image: alpine/git
     command: ['/bin/sh', '-c']
-    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /repo && mv /transit/* /repo/']
+    args: ['git clone https://github.com/ryanhausen/nautilus-cifar10.git /repo']
     volumeMounts:
     - name: gitrepo
       mountPath: /repo
-    - name: transit
-      mountPath: /transit
+
   volumes:
   - name: gitrepo
     emptyDir: {}
-  - name: transit
-    persistentVolumeClaim:
-      claimName: transit
