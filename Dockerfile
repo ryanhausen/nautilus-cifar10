@@ -11,3 +11,6 @@ RUN pip install --upgrade pip
 RUN pip install astropy
 RUN pip install keras
 RUN pip install comet-ml
+RUN pip install colorama
+RUN pip install git+https://github.com/wookayin/tensorflow-plot.git@master
+
