@@ -131,7 +131,7 @@ def get_learning_rate(epoch):
 def main():
     batch_size = 512
     #data_schedule = [(1/32, 8), (1/16, 16), (1/8, 16), (1/4, 32), (1/2, 32), (1, 64)]
-    data_schedule = [(1, 162)]
+    data_schedule = [(1/32, 80), (1/16, 20), (1/8, 68)]
 
     log_params = {
         'batch_size': batch_size,
